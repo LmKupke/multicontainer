@@ -44,3 +44,51 @@ const redisClient = redis.createClient({
     info it cannot be used for other purposes.
 */
 const redisPublisher = redisClient.duplicate();
+
+
+// Express route handlers
+
+// Retrieves values from the Postgres client
+app.get('/values/all', async (req,res) => {
+    const values = await pgClient.query('SELECT * FROM values');
+
+    // value.rows send only the info from db and no other metadata
+    res.send(values.rows);
+});
+
+// Retrieves values from the redis client
+app.get('/values/currect', async (req,res) => {
+    redisClient.hgetall('values', (err,values) => {
+        res.send(values);
+    });
+});
+
+// Adds values from the React client to both the 
+app.post('', (req,res) => {
+    const index = req.body.index;
+
+    // Capped because if Index is very large it could take days or months to calculate.
+    if (parseInt(index) > 40) {
+        return res.status(422).send('Index too high')
+    }
+
+    // The string 'Nothing yet' is added here because when the value comes in
+    // the value hasn't been calculated
+    redisClient.hset('values', index, 'Nothing yet')
+
+    // This is done because the worker is listening to 
+    // Insert events. When insert occurs then it kicks off
+    // calulation and sets the value.
+    redisPublisher.publish('insert', index)
+
+    // Takes the submitted index and stores it into postgres
+    pgClient.query('INSERT INTO values(number) VALUES($1)', [index])
+
+    // send back an arbitrary response
+    res.send({ working: true});
+});
+
+// Set up express server to listen on port
+app.listen(5000, err => {
+    console.log('Listening')
+});
