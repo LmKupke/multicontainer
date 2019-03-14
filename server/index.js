@@ -28,3 +28,19 @@ pgClient.on('error', () => console.log('Lost PG connection'));
 pgClient
     .query('CREATE TABLE IF NOT EXISTS values (number INT)')
     .catch((err) => console.log(err));
+
+// Redis Client Setup
+const redis = require('redis');
+const redisClient = redis.createClient({
+    host: keys.redisHost,
+    port: keys.redisPort,
+    retry_strategy: () => 1000
+})
+
+/* 
+    Duplicate is used because if we have a client that is listening
+    or publishing information on Redis then we have to make a duplicate connection.
+    When a connection is turned into one that is going to listen or subscribe, or publish
+    info it cannot be used for other purposes.
+*/
+const redisPublisher = redisClient.duplicate();
