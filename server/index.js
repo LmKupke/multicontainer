@@ -57,14 +57,14 @@ app.get('/values/all', async (req,res) => {
 });
 
 // Retrieves values from the redis client
-app.get('/values/currect', async (req,res) => {
+app.get('/values/current', async (req,res) => {
     redisClient.hgetall('values', (err,values) => {
         res.send(values);
     });
 });
 
 // Adds values from the React client to both the 
-app.post('', (req,res) => {
+app.post('/value', (req,res) => {
     const index = req.body.index;
 
     // Capped because if Index is very large it could take days or months to calculate.
