@@ -1,0 +1,22 @@
+language: generic
+sudo: required
+services:
+  - docker
+
+before_install:
+  - docker build -t lkupke/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run lkupke/react-test npm run test -- --coverage
+
+after_success:
+  - docker build -t lkupke/multi-client ./client
+  - docker build -t lkupke/multi-nginx ./nginx
+  - docker build -t lkupke/multi-server ./server
+  - docker build -t lkupke/multi-worker ./worker
+  # Take images and push to docker hub
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_ID" --password-stdin
+  - docker push lkupke/multi-client
+  - docker push lkupke/multi-nginx
+  - docker push lkupke/multi-server
+  - docker push lkupke/multi-worker
