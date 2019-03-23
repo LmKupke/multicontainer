@@ -50,7 +50,7 @@ const redisPublisher = redisClient.duplicate();
 
 // Retrieves values from the Postgres client
 app.get('/values/all', async (req,res) => {
-    const values = await pgClient.query('SELECT * FROM values');
+    const values = await pgClient.query('SELECT * FROM VALUES');
 
     // value.rows send only the info from db and no other metadata
     res.send(values.rows);
