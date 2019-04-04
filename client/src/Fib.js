@@ -42,18 +42,19 @@ class Fib extends Component {
     }
 
     renderSeenIndexes() {
-        return this.state.seenIndexes.map(({number}) => number).join(', ');
+        return this.state.seenIndexes.length > 0 ? this.state.seenIndexes.map(({number}) => number).join(', ') : null;
     }
 
     renderValues() {
         const entries = [];
-
-        for (let key in this.state.values) {
-            entries.push(
-                <div key={'render-' + key}>
-                    For index {key} I calculated {this.state.values[key]}
-                </div>
-            );
+        if (!this.state.values.isEmpty()) {
+            for (let key in this.state.values) {
+                entries.push(
+                    <div key={'render-' + key}>
+                        For index {key} I calculated {this.state.values[key]}
+                    </div>
+                );
+            }
         }
         return entries;
     }
